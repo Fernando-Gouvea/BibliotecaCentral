@@ -1,5 +1,4 @@
-﻿using Controllers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,8 +14,6 @@ namespace Models
         public DateTime DataDevolucao { get; set; }
         public int StatusEmprestimo { get; set; }
 
-
-        public LeitorArquivo leitorArquivo { get; set; }
-
+      
     }
 }

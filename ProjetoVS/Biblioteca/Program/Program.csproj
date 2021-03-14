@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5FE7BADC-F824-41A3-AFF1-3E540DCFFB9C}</ProjectGuid>
+    <ProjectGuid>{EBEDDD6B-A8D5-4CC6-9221-F73661498AC2}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ConsoleApp1</RootNamespace>
-    <AssemblyName>ConsoleApp1</AssemblyName>
+    <RootNamespace>Program</RootNamespace>
+    <AssemblyName>Program</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,19 +43,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Program1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Controllers\Controllers.csproj">
-      <Project>{4c20db86-110c-4002-90ca-e7e254b8094d}</Project>
+      <Project>{d4f2a0ea-020c-42f6-bb1d-e5bed4284469}</Project>
       <Name>Controllers</Name>
     </ProjectReference>
     <ProjectReference Include="..\Models\Models.csproj">
-      <Project>{48A36C06-75A6-4F7E-ABD3-A8C7E292D8A0}</Project>
+      <Project>{cd255660-9315-457a-9a6d-4b99448f1bf8}</Project>
       <Name>Models</Name>
     </ProjectReference>
   </ItemGroup>

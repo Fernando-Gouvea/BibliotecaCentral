@@ -12,7 +12,7 @@ namespace Controllers
     {
 
         List<Cliente> listCliente = new List<Cliente>();
-        Cliente cliente { set; get; }
+       
         public string Path { get; set; }
 
         public OperadorArquivo()
@@ -26,8 +26,9 @@ namespace Controllers
 
         }
 
-        public List<Cliente> Leitor()
-        {
+        public List<Cliente> Leitor(Cliente cliente)
+        {           
+
             string pathCliente = Path + "CLIENTE.csv";
             try
             {
@@ -36,7 +37,8 @@ namespace Controllers
                     while (!sr.EndOfStream)
                     {
                         string linha = sr.ReadLine();
-                        var valoresRecortados = linha.Split(',');
+                        var valoresRecortados = linha.Split(';');
+                        cliente = new Cliente {endereco = new Endereco { } };
 
                         cliente.IdCliente = int.Parse(valoresRecortados[0]);
                         cliente.Cpf = valoresRecortados[1];

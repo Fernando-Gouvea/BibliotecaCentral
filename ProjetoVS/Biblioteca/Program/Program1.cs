@@ -7,46 +7,55 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace ConsoleApp1
+namespace Program
 {
-    class Program
+    class Program1
     {
         static void Main(string[] args)
         {
+
             int op;
-            string path = @"C:\Users\ferna\Google Drive\Estagio Five\Repositorio\ProjetoBibliotecaComunitaria\"; 
+            string path = @"C:\Users\ferna\Google Drive\Estagio Five\Repositorio\ProjetoBibliotecaComunitaria\";
             List<Livro> listLivro = new List<Livro>();
+            Livro livro = new Livro();
             List<Cliente> listCliente = new List<Cliente>();
-            Cliente cliente = new Cliente();
+            Cliente cliente = new Cliente { endereco = new Endereco { } };
             OperadorArquivo OperadorArquivo = new OperadorArquivo(path);
-            listCliente = OperadorArquivo.Leitor();
-
-
-            MenuPrincipal();
-
-            if (int.TryParse(Console.ReadLine(), out op)) ;
-
-            switch (op)
+            listCliente = OperadorArquivo.Leitor(cliente);
+            do
             {
-                case '1':
-                   
-                    listCliente.Add(MenuCadastroCliente(cliente));
 
-                    break;
+                MenuPrincipal();
 
-                case '2':
-                    MenuCadastroLivro();
-                    break;
-                case '3':
-                    MenuEmprestimoLivro();
-                    break;
-                case '4':
-                    MenuDevolucaoLivro();
-                    break;
-                case '5':
-                    MenuRelatorio();
-                    break;
+                if (int.TryParse(Console.ReadLine(), out op)) { }
+
+                switch (op)
+                {
+                    case 1:
+                        int id = listCliente.Count;
+                        listCliente.Add(MenuCadastroCliente(cliente, id));
+
+                        break;
+
+                    case 2:
+                        int idLivro = listLivro.Count;
+                        MenuCadastroLivro(livro, idLivro);
+                        break;
+                    case 3:
+                        MenuEmprestimoLivro();
+                        break;
+                    case 4:
+                        MenuDevolucaoLivro();
+                        break;
+                    case 5:
+                        MenuRelatorio(listCliente);
+
+                        break;
+                }
+
+                Console.ReadKey();
             }
+            while (true);
 
         }
 
@@ -65,20 +74,20 @@ namespace ConsoleApp1
 
 
         }
-        static Cliente MenuCadastroCliente(Cliente cliente)
+        static Cliente MenuCadastroCliente(Cliente cliente, int id)
         {
-            
+
             bool teste = false;
-            
+
             Console.WriteLine("--------------------------");
             Console.WriteLine("|   Biblioteca  Central  |");
             Console.WriteLine("|------------------------|");
             Console.WriteLine("|           MENU         |");
             Console.WriteLine("|   Cadastro de Cliente  |");
             Console.WriteLine("--------------------------");
-           
-            cliente.IdCliente++;
-            Console.WriteLine("Cliente numero"+ cliente.IdCliente);
+            id++;
+            cliente.IdCliente = id;
+            Console.WriteLine("Cliente numero: " + cliente.IdCliente);
             Console.WriteLine("Digite o CPF: ");
             cliente.Cpf = CampoVazioString();
             Console.WriteLine("Digite o Nome: ");
@@ -94,26 +103,63 @@ namespace ConsoleApp1
                 }
             }
             while (!teste);
-
+            Console.WriteLine("Digite o Telefone: ");
             cliente.Telefone = CampoVazioString();
+            Console.WriteLine("\nDados do endereco do cliente");
+            Console.WriteLine("Digite Logradouro: ");
             cliente.endereco.Logradouro = CampoVazioString();
+            Console.WriteLine("Digite o Bairro: ");
             cliente.endereco.Bairro = CampoVazioString();
+            Console.WriteLine("Digite a cidade: ");
             cliente.endereco.Cidade = CampoVazioString();
+            Console.WriteLine("Digite o estado: ");
             cliente.endereco.Estado = CampoVazioString();
+            Console.WriteLine("Digite o CEP: ");
             cliente.endereco.Cep = CampoVazioString();
 
             return cliente;
 
         }
 
-        static void MenuCadastroLivro()
+        static Livro MenuCadastroLivro(Livro livro, int idLivro)
         {
+            bool teste = false;
+
             Console.WriteLine("--------------------------");
             Console.WriteLine("|   Biblioteca  Central  |");
             Console.WriteLine("|------------------------|");
             Console.WriteLine("|           MENU         |");
             Console.WriteLine("|    Cadastro de Livro   |");
             Console.WriteLine("--------------------------");
+
+            idLivro++;
+            livro.NumeroTombo = idLivro;
+           
+            Console.WriteLine("Digite o ISBN: ");
+            livro.ISBN = CampoVazioString();
+            Console.WriteLine("Digite o Titulo: ");
+            livro.Titulo = CampoVazioString();
+            Console.WriteLine("Digite o genero: ");
+            livro.Genero = CampoVazioString();
+            do
+            {
+                DateTime dataPublicacao;
+                Console.Write("Data de publicacao (dd/mm/aaaa): ");
+                if (DateTime.TryParse(Console.ReadLine(), out dataPublicacao))
+                {
+                    teste = true;
+                    livro.DataPublicacao = dataPublicacao;
+                }
+            }
+            while (!teste);
+            Console.WriteLine("Digite o Autor: ");
+            livro.Autor = CampoVazioString();
+
+            Console.WriteLine("Atencao: Coloque o numero tag no exemplar");
+            Console.WriteLine("Numero tombo: " + livro.NumeroTombo);
+
+            return livro;
+
         }
         static void MenuEmprestimoLivro()
         {
@@ -134,7 +180,7 @@ namespace ConsoleApp1
             Console.WriteLine("--------------------------");
         }
 
-        static void MenuRelatorio()
+        static void MenuRelatorio(List<Cliente> listCliente)
         {
             Console.WriteLine("--------------------------");
             Console.WriteLine("|   Biblioteca  Central  |");
@@ -144,6 +190,11 @@ namespace ConsoleApp1
             Console.WriteLine("| Emprestimo e Devolução |");
             Console.WriteLine("|        de Livros       |");
             Console.WriteLine("--------------------------");
+
+            listCliente.ForEach(i => Console.WriteLine(i.ToString()));
+            Console.ReadKey();
+
+
         }
 
         static public string CampoVazioString()

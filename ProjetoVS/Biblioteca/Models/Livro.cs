@@ -24,6 +24,11 @@ namespace Models
                 +"\nData da publicacao: "+DataPublicacao
                 +"\nAutor: "+ Autor;
         }
+
+        public string ToCsv()
+        {
+            return NumeroTombo+";"+ISBN+";"+Titulo+";"+Genero+";"+DataPublicacao+";"+Autor;
+        }
     }
 
 

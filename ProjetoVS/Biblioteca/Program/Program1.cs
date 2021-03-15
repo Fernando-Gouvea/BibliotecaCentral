@@ -16,14 +16,19 @@ namespace Program
 
             int op;
             string path = @"C:\Users\ferna\Google Drive\Estagio Five\Repositorio\ProjetoBibliotecaComunitaria\";
+            List<Emprestimo> listEmprestimo = new List<Emprestimo>();
+            Emprestimo emprestimo = new Emprestimo();
+
             List<Livro> listLivro = new List<Livro>();
             Livro livro = new Livro();
+
             List<Cliente> listCliente = new List<Cliente>();
             Cliente cliente = new Cliente { endereco = new Endereco { } };
+
             OperadorArquivo OperadorArquivo = new OperadorArquivo(path);
             listCliente = OperadorArquivo.LeitorCliente(cliente);
             listLivro = OperadorArquivo.LeitorLivro(livro);
-            
+
             do
             {
 
@@ -42,13 +47,19 @@ namespace Program
                     case 2:
                         int idLivro = listLivro.Count;
                         listLivro.Add(MenuCadastroLivro(livro, idLivro));
-                        //OperadorArquivo.SalvaLivro(listCliente);
-                        listLivro.ForEach(i => Console.WriteLine(i.ToString()));
+                        OperadorArquivo.SalvaLivro(listLivro);
+                        //listLivro.ForEach(i => Console.WriteLine(i.ToString()));
 
                         break;
                     case 3:
-                        MenuEmprestimoLivro();
-                        break;
+                        emprestimo = MenuEmprestimoLivro(emprestimo, listCliente, listLivro, cliente);
+                        if (emprestimo.cliente != null)
+                        {
+                            listEmprestimo.Add(emprestimo);
+
+                            listEmprestimo.ForEach(i => Console.WriteLine(i.ToString()));
+                        }
+                            break;
                     case 4:
                         MenuDevolucaoLivro();
                         break;
@@ -139,7 +150,7 @@ namespace Program
 
             idLivro++;
             livro.NumeroTombo = idLivro;
-           
+
             Console.WriteLine("Digite o ISBN: ");
             livro.ISBN = CampoVazioString();
             Console.WriteLine("Digite o Titulo: ");
@@ -167,15 +178,71 @@ namespace Program
             return livro;
 
         }
-        static void MenuEmprestimoLivro()
+        static Emprestimo MenuEmprestimoLivro(Emprestimo emprestimo, List<Cliente> listCliente, List<Livro> listLivro, Cliente cliente)
         {
+            bool findLivro = false, findCPF = false;
+            long nTombo = 0;
+            string CPF = "";
+            int sair = 1;
             Console.WriteLine("--------------------------");
             Console.WriteLine("|   Biblioteca  Central  |");
             Console.WriteLine("|------------------------|");
             Console.WriteLine("|           MENU         |");
             Console.WriteLine("|   Emprestimo de Livro  |");
             Console.WriteLine("--------------------------");
+
+            do
+            {
+                Console.WriteLine("Digite o NumeroTombo do exemplar: ");
+                long.TryParse(Console.ReadLine(), out nTombo);
+                
+                findLivro = listLivro.Exists(x => x.NumeroTombo == nTombo);
+                if (findLivro)
+                {
+                    emprestimo.livro = listLivro.Find(x => x.NumeroTombo == nTombo);
+                    sair = 0;
+                }
+
+                else
+                {
+                    Console.WriteLine("Livro indisponivel para emprestimo!!! entre com outro NumeroTombo.");
+                    Console.WriteLine("Deseja voltar ao menu principal? 0 - Sim , 1 - Nao");
+                    int.TryParse(Console.ReadLine(), out sair);
+                    if (sair == 0) return emprestimo;
+
+                }
+            }
+            while (sair != 0);
+
+            sair = 1;
+
+            do
+            {
+                Console.WriteLine("Digite o CPF do cliente: ");
+                CPF = Console.ReadLine();
+
+                findCPF = listCliente.Exists(x => x.Cpf.Contains(CPF));
+                if (findCPF)
+                {
+                    emprestimo.cliente = listCliente.Find(x => x.Cpf.Contains(CPF));
+                    emprestimo.StatusEmprestimo = 1;
+                    emprestimo.DataEmprestimo = DateTime.Now;
+                    sair = 0;
+                }
+
+                else
+                {
+                    Console.WriteLine("Cliente não cadastrado para emprestimo!!! entre com outro NumeroTombo.");
+                    Console.WriteLine("Deseja voltar ao menu principal? 0 - Sim , 1 - Nao");
+                    int.TryParse(Console.ReadLine(), out sair);
+                    if (sair == 0) return emprestimo;
+                }
+            }
+            while (sair != 0);
+            return emprestimo;
+
         }
+
         static void MenuDevolucaoLivro()
         {
             Console.WriteLine("--------------------------");

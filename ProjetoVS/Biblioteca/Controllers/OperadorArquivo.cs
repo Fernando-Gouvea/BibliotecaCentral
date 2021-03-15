@@ -117,7 +117,7 @@ namespace Controllers
 
                     }
                     listLivro = listLivro.OrderBy(x => x.NumeroTombo).ToList();
-                    Console.WriteLine("<<Clientes recuperados do arquivo LIVRO.CSV>>");
+                    Console.WriteLine("<<Exemplares recuperados do arquivo LIVRO.CSV>>");
                 }
             }
 
@@ -135,6 +135,22 @@ namespace Controllers
             }
 
             return listLivro;
+        }
+
+        public void SalvaLivro(List<Livro> listLivro)
+        {
+            string pathLivro = Path + "LIVRO.csv";
+
+            using (StreamWriter sw = File.CreateText(pathLivro))//cria um arquivo ou sobre escreve
+            {
+                foreach (Livro livro in listLivro)
+                {
+                    sw.WriteLine(livro.ToCsv());
+
+                }
+
+                Console.WriteLine("<<Exemplares salvos no arquivo LIVRO.csv >>");
+            }
         }
 
     }

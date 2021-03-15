@@ -12,7 +12,8 @@ namespace Controllers
     {
 
         List<Cliente> listCliente = new List<Cliente>();
-       
+        List<Livro> listLivro = new List<Livro>();
+
         public string Path { get; set; }
 
         public OperadorArquivo()
@@ -26,7 +27,7 @@ namespace Controllers
 
         }
 
-        public List<Cliente> Leitor(Cliente cliente)
+        public List<Cliente> LeitorCliente(Cliente cliente)
         {           
 
             string pathCliente = Path + "CLIENTE.csv";
@@ -43,8 +44,8 @@ namespace Controllers
                         cliente.IdCliente = int.Parse(valoresRecortados[0]);
                         cliente.Cpf = valoresRecortados[1];
                         cliente.Nome = valoresRecortados[2];
-                        cliente.DataNascimento = DateTime.Parse(valoresRecortados[3]);
-                        cliente.Telefone = valoresRecortados[4];
+                        cliente.Telefone = valoresRecortados[3];
+                        cliente.DataNascimento = DateTime.Parse(valoresRecortados[4]);
                         cliente.endereco.Logradouro = valoresRecortados[5];
                         cliente.endereco.Bairro = valoresRecortados[6];
                         cliente.endereco.Cidade = valoresRecortados[7];
@@ -73,6 +74,67 @@ namespace Controllers
             }
 
             return listCliente;
+        }
+
+        public void SalvaCliente(List<Cliente> listCliente)
+        {
+            string pathCliente = Path + "CLIENTE.csv";
+            
+            using (StreamWriter sw = File.CreateText(pathCliente))//cria um arquivo ou sobre escreve
+            {
+                foreach (Cliente cliente in listCliente)
+                {
+                    sw.WriteLine(cliente.ToCsv());
+
+                }
+
+                Console.WriteLine("<<Clientes salvos no arquivo CLIENTE.csv >>");
+            }
+        }
+
+        public List<Livro> LeitorLivro(Livro livro)
+        {
+
+            string pathLivro = Path + "LIVRO.csv";
+            try
+            {
+                using (var sr = new StreamReader(pathLivro))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        string linha = sr.ReadLine();
+                        var valoresRecortados = linha.Split(';');
+                        livro = new Livro();
+
+                        livro.NumeroTombo = int.Parse(valoresRecortados[0]);
+                        livro.ISBN = valoresRecortados[1];
+                        livro.Titulo = valoresRecortados[2];
+                        livro.Genero = valoresRecortados[3];
+                        livro.DataPublicacao = DateTime.Parse(valoresRecortados[4]);
+                        livro.Autor = valoresRecortados[5];
+                        
+                        listLivro.Add(livro);
+
+                    }
+                    listLivro = listLivro.OrderBy(x => x.NumeroTombo).ToList();
+                    Console.WriteLine("<<Clientes recuperados do arquivo LIVRO.CSV>>");
+                }
+            }
+
+            catch (IOException e)
+            {
+
+                Console.WriteLine(e.Message);
+                Console.ReadKey();
+            }
+            catch (IndexOutOfRangeException e)
+            {
+
+                Console.WriteLine(e.Message);
+                Console.ReadKey();
+            }
+
+            return listLivro;
         }
 
     }

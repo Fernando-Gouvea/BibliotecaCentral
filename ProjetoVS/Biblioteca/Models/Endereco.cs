@@ -22,6 +22,11 @@ namespace Models
                 + "\nEstado: " + Estado
                 + "\nCEP: " + Cep;
         }
+
+        public string ToCsv()
+        {
+            return Logradouro+";"+Bairro+";"+Cidade+";"+Estado+";"+Cep;
+        }
     }
 
 

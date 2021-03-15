@@ -24,5 +24,10 @@ namespace Models
                   + "\nData de Nascimento: " + DataNascimento
                   + "\n\nEndereço " + endereco.ToString();
         }
+
+        public string ToCsv()
+        {
+            return IdCliente+";"+Cpf+";"+Nome+";"+Telefone+";"+DataNascimento+";"+endereco.ToCsv();
+        }
     }
 }

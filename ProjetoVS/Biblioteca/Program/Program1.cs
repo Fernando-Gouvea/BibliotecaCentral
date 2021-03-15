@@ -21,7 +21,9 @@ namespace Program
             List<Cliente> listCliente = new List<Cliente>();
             Cliente cliente = new Cliente { endereco = new Endereco { } };
             OperadorArquivo OperadorArquivo = new OperadorArquivo(path);
-            listCliente = OperadorArquivo.Leitor(cliente);
+            listCliente = OperadorArquivo.LeitorCliente(cliente);
+            listLivro = OperadorArquivo.LeitorLivro(livro);
+            
             do
             {
 
@@ -34,12 +36,15 @@ namespace Program
                     case 1:
                         int id = listCliente.Count;
                         listCliente.Add(MenuCadastroCliente(cliente, id));
-
+                        OperadorArquivo.SalvaCliente(listCliente);
                         break;
 
                     case 2:
                         int idLivro = listLivro.Count;
-                        MenuCadastroLivro(livro, idLivro);
+                        listLivro.Add(MenuCadastroLivro(livro, idLivro));
+                        //OperadorArquivo.SalvaLivro(listCliente);
+                        listLivro.ForEach(i => Console.WriteLine(i.ToString()));
+
                         break;
                     case 3:
                         MenuEmprestimoLivro();
@@ -155,9 +160,10 @@ namespace Program
             Console.WriteLine("Digite o Autor: ");
             livro.Autor = CampoVazioString();
 
-            Console.WriteLine("Atencao: Coloque o numero tag no exemplar");
+            Console.WriteLine("\nAtencao!!!! Coloque a tag no exemplar");
             Console.WriteLine("Numero tombo: " + livro.NumeroTombo);
-
+            Console.WriteLine("<<<<Pressione enter para voltar ao menu principal>>>>");
+            Console.ReadKey();
             return livro;
 
         }

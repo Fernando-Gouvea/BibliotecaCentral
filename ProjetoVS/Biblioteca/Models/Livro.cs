@@ -10,26 +10,22 @@ namespace Models
     {
         public long NumeroTombo { get; set; }
         public string ISBN { get; set; }
-        public string  Titulo { get; set; }
+        public string Titulo { get; set; }
         public string Genero { get; set; }
         public DateTime DataPublicacao { get; set; }
         public string Autor { get; set; }
-
         public override string ToString()
         {
-            return "\nNumero Tombo: "+NumeroTombo
-                +"\nISBN: "+ISBN
-                +"\nTitulo: "+Titulo
-                +"\nGenero: "+Genero
-                +"\nData da publicacao: "+DataPublicacao
-                +"\nAutor: "+ Autor;
+            return "\nNumero Tombo: " + NumeroTombo
+                + "\nISBN: " + ISBN
+                + "\nTitulo: " + Titulo
+                + "\nGenero: " + Genero
+                + "\nData da publicacao: " + DataPublicacao
+                + "\nAutor: " + Autor;
         }
-
         public string ToCsv()
         {
-            return NumeroTombo+";"+ISBN+";"+Titulo+";"+Genero+";"+DataPublicacao+";"+Autor;
+            return NumeroTombo + ";" + ISBN + ";" + Titulo + ";" + Genero + ";" + DataPublicacao + ";" + Autor;
         }
     }
-
-
 }

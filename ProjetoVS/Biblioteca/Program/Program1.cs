@@ -28,10 +28,10 @@ namespace Program
             OperadorArquivo OperadorArquivo = new OperadorArquivo(path);
             listCliente = OperadorArquivo.LeitorCliente(cliente);
             listLivro = OperadorArquivo.LeitorLivro(livro);
+            listEmprestimo = OperadorArquivo.LeitorEmprestimo(emprestimo, listCliente, listLivro);
 
             do
             {
-
                 MenuPrincipal();
 
                 if (int.TryParse(Console.ReadLine(), out op)) { }
@@ -48,37 +48,35 @@ namespace Program
                         int idLivro = listLivro.Count;
                         listLivro.Add(MenuCadastroLivro(livro, idLivro));
                         OperadorArquivo.SalvaLivro(listLivro);
-                        //listLivro.ForEach(i => Console.WriteLine(i.ToString()));
-
                         break;
+
                     case 3:
                         emprestimo = MenuEmprestimoLivro(emprestimo, listCliente, listLivro, cliente);
                         if (emprestimo.cliente != null)
                         {
                             listEmprestimo.Add(emprestimo);
+                            OperadorArquivo.SalvaEmprestimo(listEmprestimo);
 
-                            listEmprestimo.ForEach(i => Console.WriteLine(i.ToString()));
                         }
-                            break;
+                        break;
+
                     case 4:
-                        MenuDevolucaoLivro();
+                        MenuDevolucaoLivro(listEmprestimo, listLivro);
+                        OperadorArquivo.SalvaEmprestimo(listEmprestimo);
                         break;
                     case 5:
-                        MenuRelatorio(listCliente);
-
+                        MenuRelatorio();
+                        listEmprestimo.ForEach(i => Console.WriteLine(i.ToString()));
                         break;
                 }
-
                 Console.ReadKey();
+                Console.Clear();
             }
             while (true);
-
         }
 
         static void MenuPrincipal()
         {
-
-
             Console.WriteLine("--------------------------");
             Console.WriteLine("|   Biblioteca  Central  |");
             Console.WriteLine("--------------------------");
@@ -87,13 +85,11 @@ namespace Program
             Console.WriteLine("3- Emprestimo de livro");
             Console.WriteLine("4- Devolução de livro");
             Console.WriteLine("5- Relatorio de emprestimos e devoluções");
-
-
         }
         static Cliente MenuCadastroCliente(Cliente cliente, int id)
         {
-
-            bool teste = false;
+            bool teste = false, testeCPF = false;
+            string CPF = "";
 
             Console.WriteLine("--------------------------");
             Console.WriteLine("|   Biblioteca  Central  |");
@@ -104,8 +100,15 @@ namespace Program
             id++;
             cliente.IdCliente = id;
             Console.WriteLine("Cliente numero: " + cliente.IdCliente);
-            Console.WriteLine("Digite o CPF: ");
-            cliente.Cpf = CampoVazioString();
+            do
+            {
+                Console.WriteLine("Digite o CPF: ");
+                CPF = CampoVazioString();
+                testeCPF = cliente.validaCPF(CPF);
+                if (testeCPF) cliente.Cpf = CPF;
+                else Console.WriteLine("\nCPF invalido!!!");
+            }
+            while (!testeCPF);
             Console.WriteLine("Digite o Nome: ");
             cliente.Nome = CampoVazioString();
             do
@@ -174,7 +177,7 @@ namespace Program
             Console.WriteLine("\nAtencao!!!! Coloque a tag no exemplar");
             Console.WriteLine("Numero tombo: " + livro.NumeroTombo);
             Console.WriteLine("<<<<Pressione enter para voltar ao menu principal>>>>");
-            Console.ReadKey();
+
             return livro;
 
         }
@@ -195,14 +198,13 @@ namespace Program
             {
                 Console.WriteLine("Digite o NumeroTombo do exemplar: ");
                 long.TryParse(Console.ReadLine(), out nTombo);
-                
+
                 findLivro = listLivro.Exists(x => x.NumeroTombo == nTombo);
                 if (findLivro)
                 {
                     emprestimo.livro = listLivro.Find(x => x.NumeroTombo == nTombo);
                     sair = 0;
                 }
-
                 else
                 {
                     Console.WriteLine("Livro indisponivel para emprestimo!!! entre com outro NumeroTombo.");
@@ -227,9 +229,27 @@ namespace Program
                     emprestimo.cliente = listCliente.Find(x => x.Cpf.Contains(CPF));
                     emprestimo.StatusEmprestimo = 1;
                     emprestimo.DataEmprestimo = DateTime.Now;
+                    bool teste = false;
+                    do
+                    {
+                        DateTime dataDevolucao;
+                        Console.Write("Data de devolucao (dd/mm/aaaa): ");
+                        if (DateTime.TryParse(Console.ReadLine(), out dataDevolucao))
+                        {
+                            string dDevolucao = dataDevolucao.ToString();
+                            string dataAtual = DateTime.Now.ToString();
+
+                            if (Convert.ToDateTime(dataAtual) < Convert.ToDateTime(dDevolucao))
+                            {
+                                teste = true;
+                                emprestimo.DataDevolucao = dataDevolucao;
+                            }
+                            else Console.WriteLine("Digite uma data maior que a atual " + dataAtual);
+                        }
+                    }
+                    while (!teste);
                     sair = 0;
                 }
-
                 else
                 {
                     Console.WriteLine("Cliente não cadastrado para emprestimo!!! entre com outro NumeroTombo.");
@@ -240,20 +260,74 @@ namespace Program
             }
             while (sair != 0);
             return emprestimo;
-
         }
-
-        static void MenuDevolucaoLivro()
+        static List<Emprestimo> MenuDevolucaoLivro(List<Emprestimo> listEmprestimo, List<Livro> listLivro)
         {
+            long nTombo;
+            int sair = 1;
+            double multa;
+
             Console.WriteLine("--------------------------");
             Console.WriteLine("|   Biblioteca  Central  |");
             Console.WriteLine("|------------------------|");
             Console.WriteLine("|           MENU         |");
             Console.WriteLine("|   Devolução  de Livro  |");
             Console.WriteLine("--------------------------");
+
+            Emprestimo emprestimo = new Emprestimo { livro = new Livro { } };
+
+            do
+            {
+                Console.WriteLine("Digite o NumeroTombo do exemplar a ser devolvido: ");
+                long.TryParse(Console.ReadLine(), out nTombo);
+
+                emprestimo = listEmprestimo.Find(x => x.livro.NumeroTombo == nTombo);
+
+                if (emprestimo.livro.NumeroTombo == nTombo)
+                {
+                    if (emprestimo.StatusEmprestimo == 1)
+                    {
+                        multa = CalculaMulta(emprestimo.DataDevolucao);
+                        foreach (Emprestimo e in listEmprestimo)
+                        {
+                            if (nTombo == e.livro.NumeroTombo)
+                            {
+                                e.multa = multa;
+                                e.StatusEmprestimo = 2;
+                                e.DataDevolucao = DateTime.Now;
+                                Console.WriteLine("Devolução feita com sucesso!!!");
+                                if (multa > 0)
+                                {
+                                    Console.Write("\nVoce tem multa a pagar: R$ ");
+                                    Console.Write(multa.ToString("0,0.00"));
+                                }
+
+                            }
+                        }
+
+                        sair = 0;
+                    }
+                    else
+                    {
+                        sair = 0;
+                        Console.WriteLine("Livro não encontrado para devolução!!!");
+                    }
+                }
+
+                else
+                {
+                    Console.WriteLine("Livro não cadastrado ou indisponivel!!! entre com outro NumeroTombo.");
+                    Console.WriteLine("Deseja voltar ao menu principal? 0 - Sim , 1 - Nao");
+                    int.TryParse(Console.ReadLine(), out sair);
+                    if (sair == 0) return listEmprestimo;
+                }
+            }
+            while (sair != 0);
+
+            return listEmprestimo;
         }
 
-        static void MenuRelatorio(List<Cliente> listCliente)
+        static void MenuRelatorio()
         {
             Console.WriteLine("--------------------------");
             Console.WriteLine("|   Biblioteca  Central  |");
@@ -263,10 +337,6 @@ namespace Program
             Console.WriteLine("| Emprestimo e Devolução |");
             Console.WriteLine("|        de Livros       |");
             Console.WriteLine("--------------------------");
-
-            listCliente.ForEach(i => Console.WriteLine(i.ToString()));
-            Console.ReadKey();
-
 
         }
 
@@ -282,5 +352,20 @@ namespace Program
 
             return tratamento;
         }
+
+        static public double CalculaMulta(DateTime DataDevolucao)
+        {
+            double multa = 0;
+            string dataEmprestimo = DataDevolucao.ToString();
+            string dataAtual = DateTime.Now.ToString();
+
+            TimeSpan date = Convert.ToDateTime(dataEmprestimo) - Convert.ToDateTime(dataAtual);
+
+            int dias = date.Days;
+            multa = dias * 0.10;
+
+            return multa;
+        }
+
     }
 }

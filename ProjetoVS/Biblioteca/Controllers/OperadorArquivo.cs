@@ -13,6 +13,7 @@ namespace Controllers
 
         List<Cliente> listCliente = new List<Cliente>();
         List<Livro> listLivro = new List<Livro>();
+        List<Emprestimo> listEmprestimo = new List<Emprestimo>();
 
         public string Path { get; set; }
 
@@ -28,7 +29,7 @@ namespace Controllers
         }
 
         public List<Cliente> LeitorCliente(Cliente cliente)
-        {           
+        {
 
             string pathCliente = Path + "CLIENTE.csv";
             try
@@ -39,7 +40,7 @@ namespace Controllers
                     {
                         string linha = sr.ReadLine();
                         var valoresRecortados = linha.Split(';');
-                        cliente = new Cliente {endereco = new Endereco { } };
+                        cliente = new Cliente { endereco = new Endereco { } };
 
                         cliente.IdCliente = int.Parse(valoresRecortados[0]);
                         cliente.Cpf = valoresRecortados[1];
@@ -70,7 +71,14 @@ namespace Controllers
             {
 
                 Console.WriteLine(e.Message);
-                Console.ReadKey();
+
+            }
+
+            catch (FormatException e)
+            {
+
+                Console.WriteLine(e.Message);
+
             }
 
             return listCliente;
@@ -79,7 +87,7 @@ namespace Controllers
         public void SalvaCliente(List<Cliente> listCliente)
         {
             string pathCliente = Path + "CLIENTE.csv";
-            
+
             using (StreamWriter sw = File.CreateText(pathCliente))//cria um arquivo ou sobre escreve
             {
                 foreach (Cliente cliente in listCliente)
@@ -112,7 +120,7 @@ namespace Controllers
                         livro.Genero = valoresRecortados[3];
                         livro.DataPublicacao = DateTime.Parse(valoresRecortados[4]);
                         livro.Autor = valoresRecortados[5];
-                        
+
                         listLivro.Add(livro);
 
                     }
@@ -125,13 +133,20 @@ namespace Controllers
             {
 
                 Console.WriteLine(e.Message);
-                Console.ReadKey();
+
             }
             catch (IndexOutOfRangeException e)
             {
 
                 Console.WriteLine(e.Message);
-                Console.ReadKey();
+
+            }
+
+            catch (FormatException e)
+            {
+
+                Console.WriteLine(e.Message);
+
             }
 
             return listLivro;
@@ -150,6 +165,79 @@ namespace Controllers
                 }
 
                 Console.WriteLine("<<Exemplares salvos no arquivo LIVRO.csv >>");
+            }
+        }
+
+        public List<Emprestimo> LeitorEmprestimo(Emprestimo emprestimo, List<Cliente> listCliente, List<Livro> listLivro)
+        {
+
+            string pathEmprestimo = Path + "EMPRESTIMO.csv";
+            try
+            {
+                using (var sr = new StreamReader(pathEmprestimo))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        string linha = sr.ReadLine();
+                        var valoresRecortados = linha.Split(';');
+                        emprestimo = new Emprestimo { cliente = new Cliente { }, livro = new Livro { } };
+
+                        long idCliente = long.Parse(valoresRecortados[0]);
+                        emprestimo.cliente = listCliente.Find(x => x.IdCliente == idCliente);
+
+                        long nTombo = int.Parse(valoresRecortados[1]);
+                        emprestimo.livro = listLivro.Find(x => x.NumeroTombo == nTombo);
+                        DateTime data;
+                        DateTime.TryParse(valoresRecortados[2], out data);
+                        emprestimo.DataEmprestimo = data;
+                        DateTime.TryParse(valoresRecortados[3], out data);
+                        emprestimo.DataDevolucao = data;
+                        emprestimo.StatusEmprestimo = int.Parse(valoresRecortados[4]);
+
+
+                        listEmprestimo.Add(emprestimo);
+
+                    }
+
+                    Console.WriteLine("<<Dados recuperados do arquivo EMPRESTIMO.CSV>>");
+                }
+            }
+
+            catch (IOException e)
+            {
+
+                Console.WriteLine(e.Message);
+
+            }
+            catch (IndexOutOfRangeException e)
+            {
+
+                Console.WriteLine(e.Message);
+
+            }
+
+            catch (FormatException e)
+            {
+
+                Console.WriteLine(e.Message);
+
+            }
+            return listEmprestimo;
+        }
+
+        public void SalvaEmprestimo(List<Emprestimo> listEmprestimo)
+        {
+            string pathEmprestimo = Path + "EMPRESTIMO.csv";
+
+            using (StreamWriter sw = File.CreateText(pathEmprestimo))
+            {
+                foreach (Emprestimo emprestimo in listEmprestimo)
+                {
+                    sw.WriteLine(emprestimo.ToCsv());
+
+                }
+
+                Console.WriteLine("<<Cadastro emprestimo salvo no arquivo EMPRESTIMO.csv >>");
             }
         }
 

@@ -25,10 +25,7 @@ namespace Models
 
         public string ToCsv()
         {
-            return Logradouro+";"+Bairro+";"+Cidade+";"+Estado+";"+Cep;
+            return Logradouro + ";" + Bairro + ";" + Cidade + ";" + Estado + ";" + Cep;
         }
     }
-
-
-   
 }

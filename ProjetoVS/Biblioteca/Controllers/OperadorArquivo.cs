@@ -65,7 +65,7 @@ namespace Controllers
             {
 
                 Console.WriteLine(e.Message);
-                Console.ReadKey();
+                
             }
             catch (IndexOutOfRangeException e)
             {

@@ -40,18 +40,28 @@ namespace Program
                 {
                     case 1:
                         int id = listCliente.Count;
-                        listCliente.Add(MenuCadastroCliente(cliente, id));
-                        OperadorArquivo.SalvaCliente(listCliente);
+                        cliente = MenuCadastroCliente(listCliente, id);
+
+                        if (cliente != null)
+                        {
+                            listCliente.Add(cliente);
+                            OperadorArquivo.SalvaCliente(listCliente);
+                        }
                         break;
 
                     case 2:
                         int idLivro = listLivro.Count;
-                        listLivro.Add(MenuCadastroLivro(livro, idLivro));
-                        OperadorArquivo.SalvaLivro(listLivro);
+                        livro = MenuCadastroLivro(listLivro, idLivro);
+
+                        if (livro != null)
+                        {
+                            listLivro.Add(livro);
+                            OperadorArquivo.SalvaLivro(listLivro);
+                        }
                         break;
 
                     case 3:
-                        emprestimo = MenuEmprestimoLivro(emprestimo, listCliente, listLivro, cliente);
+                        emprestimo = MenuEmprestimoLivro(emprestimo, listCliente, listLivro);
                         if (emprestimo.cliente != null)
                         {
                             listEmprestimo.Add(emprestimo);
@@ -86,9 +96,9 @@ namespace Program
             Console.WriteLine("4- Devolução de livro");
             Console.WriteLine("5- Relatorio de emprestimos e devoluções");
         }
-        static Cliente MenuCadastroCliente(Cliente cliente, int id)
+        static Cliente MenuCadastroCliente(List<Cliente> listCliente, int id)
         {
-            bool teste = false, testeCPF = false;
+            bool teste = false, testeCPF = false, clienteExistente = false;
             string CPF = "";
 
             Console.WriteLine("--------------------------");
@@ -98,14 +108,23 @@ namespace Program
             Console.WriteLine("|   Cadastro de Cliente  |");
             Console.WriteLine("--------------------------");
             id++;
+            Cliente cliente = new Cliente { endereco = new Endereco { } };
             cliente.IdCliente = id;
+
             Console.WriteLine("Cliente numero: " + cliente.IdCliente);
             do
             {
                 Console.WriteLine("Digite o CPF: ");
                 CPF = CampoVazioString();
                 testeCPF = cliente.validaCPF(CPF);
-                if (testeCPF) cliente.Cpf = CPF;
+                clienteExistente = listCliente.Exists(x => x.Cpf.Contains(CPF));
+                if (testeCPF)
+                    if (!clienteExistente) cliente.Cpf = CPF;
+                    else
+                    {
+                        Console.WriteLine("Cliente existente!!!");
+                        return cliente = null;
+                    }
                 else Console.WriteLine("\nCPF invalido!!!");
             }
             while (!testeCPF);
@@ -140,9 +159,9 @@ namespace Program
 
         }
 
-        static Livro MenuCadastroLivro(Livro livro, int idLivro)
+        static Livro MenuCadastroLivro(List<Livro> listLivro, int idLivro)
         {
-            bool teste = false;
+            bool teste = false, testISBN = false;
 
             Console.WriteLine("--------------------------");
             Console.WriteLine("|   Biblioteca  Central  |");
@@ -152,10 +171,21 @@ namespace Program
             Console.WriteLine("--------------------------");
 
             idLivro++;
+            Livro livro = new Livro();
             livro.NumeroTombo = idLivro;
 
             Console.WriteLine("Digite o ISBN: ");
-            livro.ISBN = CampoVazioString();
+            string ISBN = CampoVazioString();
+
+            testISBN = listLivro.Exists(x => x.ISBN.Contains(ISBN));
+
+            if (!testISBN) livro.ISBN = ISBN;
+            else
+            {
+                Console.WriteLine("Livro existente!!!");
+                return livro = null;
+            }
+
             Console.WriteLine("Digite o Titulo: ");
             livro.Titulo = CampoVazioString();
             Console.WriteLine("Digite o genero: ");
@@ -181,7 +211,7 @@ namespace Program
             return livro;
 
         }
-        static Emprestimo MenuEmprestimoLivro(Emprestimo emprestimo, List<Cliente> listCliente, List<Livro> listLivro, Cliente cliente)
+        static Emprestimo MenuEmprestimoLivro(Emprestimo emprestimo, List<Cliente> listCliente, List<Livro> listLivro)
         {
             bool findLivro = false, findCPF = false;
             long nTombo = 0;
@@ -282,30 +312,37 @@ namespace Program
                 long.TryParse(Console.ReadLine(), out nTombo);
 
                 emprestimo = listEmprestimo.Find(x => x.livro.NumeroTombo == nTombo);
-
-                if (emprestimo.livro.NumeroTombo == nTombo)
+                if (emprestimo != null)
                 {
-                    if (emprestimo.StatusEmprestimo == 1)
+                    if (emprestimo.livro.NumeroTombo == nTombo)
                     {
-                        multa = CalculaMulta(emprestimo.DataDevolucao);
-                        foreach (Emprestimo e in listEmprestimo)
+                        if (emprestimo.StatusEmprestimo == 1)
                         {
-                            if (nTombo == e.livro.NumeroTombo)
+                            multa = CalculaMulta(emprestimo.DataDevolucao);
+                            foreach (Emprestimo e in listEmprestimo)
                             {
-                                e.multa = multa;
-                                e.StatusEmprestimo = 2;
-                                e.DataDevolucao = DateTime.Now;
-                                Console.WriteLine("Devolução feita com sucesso!!!");
-                                if (multa > 0)
+                                if (nTombo == e.livro.NumeroTombo)
                                 {
-                                    Console.Write("\nVoce tem multa a pagar: R$ ");
-                                    Console.Write(multa.ToString("0,0.00"));
+                                    e.multa = multa;
+                                    e.StatusEmprestimo = 2;
+                                    e.DataDevolucao = DateTime.Now;
+                                    Console.WriteLine("Devolução feita com sucesso!!!");
+                                    if (multa > 0)
+                                    {
+                                        Console.Write("\nVoce tem multa a pagar: R$ ");
+                                        Console.WriteLine(multa.ToString("0,0.00"));
+                                    }
+
                                 }
-
                             }
-                        }
 
-                        sair = 0;
+                            sair = 0;
+                        }
+                        else
+                        {
+                            sair = 0;
+                            Console.WriteLine("Livro não encontrado para devolução!!!");
+                        }
                     }
                     else
                     {
@@ -359,10 +396,11 @@ namespace Program
             string dataEmprestimo = DataDevolucao.ToString();
             string dataAtual = DateTime.Now.ToString();
 
-            TimeSpan date = Convert.ToDateTime(dataEmprestimo) - Convert.ToDateTime(dataAtual);
+            TimeSpan date = Convert.ToDateTime(dataAtual) - Convert.ToDateTime(dataEmprestimo);
 
             int dias = date.Days;
-            multa = dias * 0.10;
+            if (dias > 0) multa = dias * 0.10;
+            else multa = 0;
 
             return multa;
         }
